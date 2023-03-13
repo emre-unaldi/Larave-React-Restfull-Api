@@ -1,19 +1,53 @@
-import { Image, Typography, Button, Modal, Space } from "antd";
+import { useState } from "react";
+import { Image, Typography, Button, Modal, Space, message } from "antd";
 import {
   DeleteOutlined,
   FormOutlined,
   ExclamationCircleFilled,
 } from "@ant-design/icons";
-import { useState } from "react";
 import UpdateForm from "./UpdateForm";
+import axios from "axios";
 
-function CardItem() {
+function CardItem(props) {
+  const { title, description, image, id } = props;
   const [openAddModal, setOpenAddModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
   const { Text } = Typography;
+
+  const deleteMovie = () => {
+    setOpenDeleteModal(false);
+    messageApi
+      .open({
+        type: "loading",
+        content: "Deleting in progress",
+        duration: 2,
+      })
+      .then(() => {
+        axios
+          .post(
+            "http://localhost:8000/movie/delete",
+            { id },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+              },
+            }
+          )
+          .then((result) => {
+            console.log("deleted :", result);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .then(() => message.success("Delete finished", 1));
+  };
 
   return (
     <>
+      {contextHolder}
       <Space
         direction="vertical"
         style={{
@@ -22,7 +56,6 @@ function CardItem() {
         }}
       >
         <Modal
-          title="Update Record"
           centered
           open={openAddModal}
           onCancel={() => setOpenAddModal(false)}
@@ -30,15 +63,14 @@ function CardItem() {
           okButtonProps={{ style: { display: "none" } }}
           cancelButtonProps={{ style: { display: "none" } }}
         >
-          <UpdateForm />
+          <UpdateForm recordId={id} />
         </Modal>
         <Modal
           title="Delete Record"
           centered
           open={openDeleteModal}
           onOk={() => {
-            console.warn("delete");
-            setOpenDeleteModal(false);
+            deleteMovie();
           }}
           okType="danger"
           okText="Yes"
@@ -51,15 +83,15 @@ function CardItem() {
         >
           Are you sure you want to delete the record?
         </Modal>
-        <Image src="https://source.unsplash.com/random" />
-        <Text strong>Title</Text>
-        <Text type="secondary">Description</Text>
+        <Image src={image} />
+        <Text strong>{title}</Text>
+        <Text type="secondary">{description}</Text>
         <Space
           direction="horizontal"
           style={{
             padding: 10,
             display: "flex",
-            justifyContent: "space-around",
+            justifyContent: "space-around"
           }}
         >
           <Button

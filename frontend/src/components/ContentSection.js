@@ -1,12 +1,28 @@
-import { Layout, Card, Button, Modal, Space } from "antd";
-import { useState } from "react";
-import CardItem from "./CardItem";
+import { Layout, Card, Button, Modal, Space, Typography  } from "antd";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { PlusOutlined } from "@ant-design/icons";
+import CardItem from "./CardItem";
 import AddForm from "./AddForm";
-const { Content } = Layout;
 
 const ContentSection = () => {
+  const [movie, setMovie] = useState("");
+  const { Title } = Typography;
+
+  useEffect(() => {
+    axios
+      .get("http://127.0.0.1:8000/movie/show")
+      .then((result) => {
+        const response = result.data;
+        setMovie(response);
+      })
+      .catch((err) => {
+        console.warn(err);
+      });
+  }, [movie]);
+
   const [openAddModal, setOpenAddModal] = useState(false);
+  const { Content } = Layout;
 
   return (
     <>
@@ -15,11 +31,10 @@ const ContentSection = () => {
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
         }}
       >
         <Modal
-          title="Add Record"
           centered
           open={openAddModal}
           onCancel={() => setOpenAddModal(false)}
@@ -45,25 +60,37 @@ const ContentSection = () => {
         <Content
           className="site-layout"
           style={{
-            padding: "0 50px 50px 50px"
+            padding: "5px 50px 50px 50px",
+            minWidth: "100vw",
           }}
         >
-          <Card>
-            <Card.Grid style={{ width: "20%" }}>
-              <CardItem />
-            </Card.Grid>
-            <Card.Grid style={{ width: "20%" }}>
-              <CardItem />
-            </Card.Grid>
-            <Card.Grid style={{ width: "20%" }}>
-              <CardItem />
-            </Card.Grid>
-            <Card.Grid style={{ width: "20%" }}>
-              <CardItem />
-            </Card.Grid>
-            <Card.Grid style={{ width: "20%" }}>
-              <CardItem />
-            </Card.Grid>
+          <Card
+            style={{
+              paddingBottom: 10 
+            }}
+          >
+            {movie.length > 0
+              ? Array.from(movie).map((movie) => {
+                  return (
+                    <Card.Grid key={movie.id} style={{ width: "20%" }}>
+                      <CardItem
+                        title={movie.title}
+                        description={movie.description}
+                        image={movie.image}
+                        id={movie.id}
+                      />
+                    </Card.Grid>
+                  );
+                })
+              : 
+              <Title style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center"
+              }} level={2}>
+                There are no records to list!
+              </Title>
+              }
           </Card>
         </Content>
       </Space>
