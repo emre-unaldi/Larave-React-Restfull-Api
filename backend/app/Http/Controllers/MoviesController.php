@@ -20,18 +20,18 @@ class MoviesController extends Controller
     }
 
 	public function show() {
-        $movie = Movie::query()->get();
+        $movie = Movie::get();
         return $movie;
     }
 
     public function edit(Request $request) {
-        $movie = Movie::query()->find($request->id);
+        $movie = Movie::find($request->id);
 
         return $movie;
     }
 
     public function update(Request $request) { 
-        $movie = Movie::query()->find($request->id);
+        $movie = Movie::find($request->id);
         $movie->title = $request->title;
         $movie->description = $request->description;
         $movie->image = $request->image;
@@ -41,7 +41,7 @@ class MoviesController extends Controller
     }
 
 	public function delete(Request $request) {
-        $movie = Movie::query()->find($request->id);
+        $movie = Movie::find($request->id);
         $movie->delete();
 
         return $movie;
